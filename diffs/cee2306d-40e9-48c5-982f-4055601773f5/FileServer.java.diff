@@ -70,17 +70,17 @@
      }
  
      @PostMapping(value = "/fileupload")
--    public ModelAndView importFile(@RequestParam("file") MultipartFile myFile) throws IOException {
-+    File destinationFile = new File(destinationDir, myFile.getOriginalFilename());
-+    String normalizedPath = destinationFile.getCanonicalPath();
-+    if (!normalizedPath.startsWith(new File(destinationDir).getCanonicalPath())) {
-+        throw new IOException("Invalid file path");
-+    }
-+    myFile.transferTo(destinationFile);
+     public ModelAndView importFile(@RequestParam("file") MultipartFile myFile) throws IOException {
          var user = (WebGoatUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
          var destinationDir = new File(fileLocation, user.getUsername());
          destinationDir.mkdirs();
-         myFile.transferTo(new File(destinationDir, myFile.getOriginalFilename()));
+-        myFile.transferTo(new File(destinationDir, myFile.getOriginalFilename()));
++        File destinationFile = new File(destinationDir, myFile.getOriginalFilename());
++        String normalizedPath = destinationFile.getCanonicalPath();
++        if (!normalizedPath.startsWith(destinationDir.getCanonicalPath())) {
++            throw new IOException("Invalid file path");
++        }
++        myFile.transferTo(destinationFile);
          log.debug("File saved to {}", new File(destinationDir, myFile.getOriginalFilename()));
  
          return new ModelAndView(
